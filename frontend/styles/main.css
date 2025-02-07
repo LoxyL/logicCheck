@@ -1,0 +1,68 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.upload-section {
+    margin: 20px 0;
+    padding: 20px;
+    border: 2px dashed #ccc;
+    text-align: center;
+}
+
+.progress-section {
+    margin: 20px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress {
+    width: 0%;
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.3s ease;
+}
+
+.error-list {
+    margin-top: 20px;
+}
+
+.segment-item {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.segment-info {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.segment-info pre {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 3px;
+    overflow-x: auto;
+}
+
+.error-item {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #fff;
+    border-left: 3px solid #ff4444;
+}
+
+.error-item h4 {
+    color: #ff4444;
+    margin: 0 0 10px 0;
+} 

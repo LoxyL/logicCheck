@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档智能勘误系统</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <h1>文档智能勘误系统</h1>
+        
+        <div class="upload-section">
+            <input type="file" id="fileInput" accept=".doc,.docx">
+            <button id="uploadBtn">上传文档</button>
+        </div>
+
+        <div class="progress-section" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+            <p class="progress-text">正在分析中...</p>
+        </div>
+
+        <div class="results-section">
+            <div class="error-list">
+                <!-- 错误列表将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+    <script src="scripts/main.js"></script>
+</body>
+</html> 
