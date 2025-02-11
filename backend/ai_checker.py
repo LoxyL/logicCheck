@@ -18,8 +18,9 @@ class AIModelAPI:
         
     def generate(self, prompt):
         try:
+            config = load_config()
             response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=config.get('MODEL_NAME', 'gpt-4'),
                 messages=[
                     {"role": "user", "content": prompt}
                 ],
@@ -29,27 +30,48 @@ class AIModelAPI:
         except Exception as e:
             raise Exception(f"API调用失败: {str(e)}")
 
+def load_config():
+    config = {}
+    with open('backend/config.txt', 'r') as f:
+        for line in f:
+            if '=' in line:
+                key, value = line.strip().split('=', 1)
+                config[key] = value
+    return config
+
 class AIChecker:
     def __init__(self):
-        api_key = os.getenv("OPENAI_API_KEY")
-        base_url = os.getenv("OPENAI_API_BASE_URL")
-        api_key = "hk-piidk61000036048c6e26ccd2f9cba72db0ca084190047f5"
-        base_url = "https://api.openai-hk.com/v1"
+        config = load_config()
+        api_key = config['API_KEY']
+        base_url = config['API_URL']
 
         if not api_key:
-            raise ValueError("请设置OPENAI_API_KEY环境变量")
+            raise ValueError("未能从配置文件中读取到API密钥")
             
         self.llm = AIModelAPI(api_key=api_key, base_url=base_url)
         self.prompt_template = PromptTemplate(
             input_variables=["text"],
-            template=u"请检查以下教育材料中的错误，包括:\n"
-                    u"1. 逻辑错误\n"
-                    u"2. 错别字\n"
-                    u"3. 语句不通顺\n\n"
-                    u"文本内容:\n"
-                    u"\"{text}\"\n\n"
-                    u"请以JSON数组格式返回发现的错误，每个错误对象包含type(错误类型)、"
-                    u"location(错误位置)、original(原文内容)、suggestion(修改建议)字段。"
+            template=u"""请检查以下教育材料中的错误，仅关注：
+1. 错别字
+2. 严重的语句不通顺问题（仅标记真正难以理解或读起来很不通顺的句子，不要标记仅需优化的句子）
+
+注意事项：
+- 只有当句子读起来确实很困难，或者表达严重不清时，才标记为"语句不通顺"
+- 对于可以理解但表达不够优美的句子，不要标记
+- 错别字必须是确定的错误，不要标记可能的同音字或习惯用法
+- 大部分文本可能不需要任何修改
+
+文本内容:
+\"{text}\"
+
+如果发现错误，请以JSON数组格式返回，每个错误对象包含：
+- type: 错误类型（"错别字"或"语句不通顺"）
+- location: 错误位置
+- original: 原文内容
+- suggestion: 修改建议
+
+如果没有发现需要修改的错误，请返回空数组 []。
+"""
         )
 
     def check_content(self, text_segments):
@@ -59,11 +81,11 @@ class AIChecker:
                 prompt = self.prompt_template.format(text=segment['text'])
                 response = self.llm.generate(prompt)
                 errors = self._parse_response(response)
-                if errors:
-                    yield {
-                        'segment': segment,
-                        'errors': errors
-                    }
+                # 无论是否有错误都返回结果
+                yield {
+                    'segment': segment,
+                    'errors': errors
+                }
             except Exception as e:
                 print(f"处理文本段落时出错: {str(e)}")
                 continue

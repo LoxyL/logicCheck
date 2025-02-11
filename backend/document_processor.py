@@ -6,12 +6,25 @@ from openai import OpenAI
 import re
 import json
 
+def load_config():
+    config = {}
+    with open('backend/config.txt', 'r') as f:
+        for line in f:
+            if '=' in line:
+                key, value = line.strip().split('=', 1)
+                config[key] = value
+    return config
+
+config = load_config()
+API_URL = config['API_URL']
+API_KEY = config['API_KEY']
+
 class DocumentProcessor:
     def __init__(self):
         # 初始化OpenAI客户端用于文档结构分析
         self.client = OpenAI(
-            api_key="hk-piidk61000036048c6e26ccd2f9cba72db0ca084190047f5",
-            base_url="https://api.openai-hk.com/v1"
+            api_key=API_KEY,
+            base_url=API_URL
         )
         
         # 更新分析提示，要求更精确的结构分析
@@ -72,8 +85,9 @@ class DocumentProcessor:
         """使用AI分析文档结构"""
         try:
             prompt = self.structure_prompt.format(text=text_sample)
+            config = load_config()
             response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=config.get('MODEL_NAME', 'gpt-4'),  # 使用配置文件中的模型名称，默认为 gpt-4
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3
             )

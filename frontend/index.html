@@ -5,27 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文档智能勘误系统</title>
     <link rel="stylesheet" href="styles/main.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>文档智能勘误系统</h1>
-        
-        <div class="upload-section">
-            <input type="file" id="fileInput" accept=".doc,.docx">
-            <button id="uploadBtn">上传文档</button>
+    <div class="app-container">
+        <!-- 左侧面板 -->
+        <div class="left-panel">
+            <div class="upload-section">
+                <h2>文档上传</h2>
+                <div class="upload-area" id="dropZone">
+                    <i class="material-icons">cloud_upload</i>
+                    <p>拖放文件到此处或点击上传</p>
+                    <input type="file" id="fileInput" accept=".doc,.docx" hidden>
+                </div>
+                <div class="file-info" style="display: none;">
+                    <div class="file-details">
+                        <i class="material-icons">description</i>
+                        <span class="file-name">未选择文件</span>
+                    </div>
+                    <button class="upload-btn" id="uploadBtn" disabled>
+                        <i class="material-icons">send</i>
+                        开始分析
+                    </button>
+                </div>
+                <div class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress"></div>
+                    </div>
+                    <p class="progress-text">正在分析中...</p>
+                </div>
+            </div>
         </div>
 
-        <div class="progress-section" style="display: none;">
-            <div class="progress-bar">
-                <div class="progress"></div>
+        <!-- 右侧面板 -->
+        <div class="right-panel">
+            <div class="results-header">
+                <h2>分析结果</h2>
+                <div class="filter-section">
+                    <button class="filter-btn active" data-type="all">全部</button>
+                    <button class="filter-btn disabled" data-type="logic" disabled title="暂时关闭逻辑错误检查">逻辑错误</button>
+                    <button class="filter-btn" data-type="typo">错别字</button>
+                    <button class="filter-btn" data-type="grammar">语句不通</button>
+                    <button class="view-mode-btn" id="errorOnlyBtn">
+                        <i class="material-icons">error_outline</i>
+                        仅显示错误
+                    </button>
+                </div>
             </div>
-            <p class="progress-text">正在分析中...</p>
-        </div>
-
-        <div class="results-section">
-            <div class="error-list">
-                <!-- 错误列表将在这里动态生成 -->
-            </div>
+            <div class="error-list"></div>
         </div>
     </div>
     <script src="scripts/main.js"></script>
