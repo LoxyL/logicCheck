@@ -1,3 +1,0 @@
-API_URL=https://api.siliconflow.cn/v1
-API_KEY=sk-jhlanpxtwxmtynneqlfsxxrbneumferwoilscqobnpmrxhqv
-MODEL_NAME=deepseek-ai/DeepSeek-V3
