@@ -1,1 +1,5 @@
 backend/config.txt
+# Docker
+.docker/
+docker-compose.override.yml
+*.env

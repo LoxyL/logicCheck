@@ -1,0 +1,11 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "8402:8402"
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+    environment:
+      - FLASK_ENV=production 

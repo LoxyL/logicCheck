@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let isProcessing = false;
     let showErrorOnly = false;
 
+    // 将所有与后端通信的URL从5000端口改为8402端口
+    const backendUrl = '';  // 或者直接使用相对路径 '/'
+
     // 拖放文件处理
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -179,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadBtn.style.opacity = '0.7';
 
         try {
-            const response = await fetch('http://localhost:5000/check-document', {
+            const response = await fetch(`${backendUrl}/check-document`, {
                 method: 'POST',
                 body: formData
             });

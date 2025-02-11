@@ -1,13 +1,24 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
 from document_processor import DocumentProcessor
 from ai_checker import AIChecker
 import traceback
 import json
 import io
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend')
 CORS(app)
+
+# 添加根路由，返回前端页面
+@app.route('/')
+def serve_frontend():
+    return send_from_directory(app.static_folder, 'index.html')
+
+# 添加静态文件路由
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory(app.static_folder, path)
 
 @app.route('/check-document', methods=['POST'])
 def check_document():
@@ -49,4 +60,4 @@ def check_document():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(host='0.0.0.0', port=8402) 
