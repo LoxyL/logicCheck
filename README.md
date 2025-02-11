@@ -7,8 +7,8 @@
 ### 方法1：使用 Docker（推荐）
 
 ```bash
-docker pull 你的Docker用户名/logiccheck:latest
-docker run -d -p 8402:8402 你的Docker用户名/logiccheck:latest
+docker pull loxyl/logiccheck:latest
+docker run -d -p 8402:8402 loxyl/logiccheck:latest
 ```
 
 ### 方法2：使用 docker-compose 部署
