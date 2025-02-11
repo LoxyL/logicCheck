@@ -7,12 +7,16 @@ import json
 import io
 import os
 
-app = Flask(__name__, static_folder='../frontend')
+# 修改静态文件夹的路径配置
+static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
+app = Flask(__name__, static_folder=static_folder)
 CORS(app)
 
 # 添加根路由，返回前端页面
 @app.route('/')
 def serve_frontend():
+    print(f"Static folder path: {app.static_folder}")
+    print(f"File exists: {os.path.exists(os.path.join(app.static_folder, 'index.html'))}")
     return send_from_directory(app.static_folder, 'index.html')
 
 # 添加静态文件路由
