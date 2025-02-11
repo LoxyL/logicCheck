@@ -7,7 +7,9 @@ from langchain.prompts import PromptTemplate
 load_dotenv()
 
 class AIModelAPI:
-    def __init__(self, api_key, base_url=None):
+    def __init__(self, model, api_key, base_url=None):
+        self.model = model
+
         client_params = {
             "api_key": api_key,
         }
@@ -18,9 +20,8 @@ class AIModelAPI:
         
     def generate(self, prompt):
         try:
-            config = load_config()
             response = self.client.chat.completions.create(
-                model=config.get('MODEL_NAME', 'gpt-4'),
+                model=self.model,
                 messages=[
                     {"role": "user", "content": prompt}
                 ],
@@ -41,14 +42,9 @@ def load_config():
 
 class AIChecker:
     def __init__(self):
-        config = load_config()
-        api_key = config['API_KEY']
-        base_url = config['API_URL']
-
-        if not api_key:
-            raise ValueError("未能从配置文件中读取到API密钥")
-            
-        self.llm = AIModelAPI(api_key=api_key, base_url=base_url)
+        self.api_base = None
+        self.api_key = None
+        self.model = None
         self.prompt_template = PromptTemplate(
             input_variables=["text"],
             template=u"""请检查以下教育材料中的错误，仅关注：
@@ -73,6 +69,14 @@ class AIChecker:
 如果没有发现需要修改的错误，请返回空数组 []。
 """
         )
+
+    def set_api_config(self, api_base, api_key, model):
+        """设置API配置"""
+        self.api_base = api_base
+        self.api_key = api_key
+        self.model = model
+            
+        self.llm = AIModelAPI(model=self.model, api_key=self.api_key, base_url=self.api_base)
 
     def check_content(self, text_segments):
         """处理分段后的文本，使用生成器实时返回结果"""

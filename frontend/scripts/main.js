@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let showErrorOnly = false;
 
     // 将所有与后端通信的URL从5000端口改为8402端口
-    const backendUrl = '';  // 或者直接使用相对路径 '/'
+    const backendUrl = 'http://localhost:8402';  // 或者直接使用相对路径 '/'
 
     // 拖放文件处理
     dropZone.addEventListener('dragover', (e) => {
@@ -161,6 +161,16 @@ document.addEventListener('DOMContentLoaded', function() {
     async function processNextFile() {
         if (fileQueue.length === 0 || isProcessing) return;
 
+        const apiBase = localStorage.getItem('apiBase');
+        const apiKey = localStorage.getItem('apiKey');
+        const selectedModel = document.getElementById('modelSelect').value;
+        
+        if (!apiBase || !apiKey) {
+            alert('请先在设置中配置API信息');
+            openSettings();
+            return;
+        }
+
         isProcessing = true;
         const currentFile = fileQueue[0];
         updateFileQueueDisplay();
@@ -184,6 +194,11 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch(`${backendUrl}/check-document`, {
                 method: 'POST',
+                headers: {
+                    'api-base': apiBase,
+                    'api-key': apiKey,
+                    'model': selectedModel
+                },
                 body: formData
             });
 
@@ -286,4 +301,146 @@ document.addEventListener('DOMContentLoaded', function() {
             segmentDiv.scrollIntoView({ behavior: 'smooth' });
         }
     }
+
+    // 添加设置相关函数
+    function openSettings() {
+        const modal = document.getElementById('settingsModal');
+        const apiBase = localStorage.getItem('apiBase') || '';
+        const apiKey = localStorage.getItem('apiKey') || '';
+        
+        document.getElementById('apiBase').value = apiBase;
+        document.getElementById('apiKey').value = apiKey;
+        modal.style.display = 'block';
+    }
+
+    function closeSettings() {
+        const modal = document.getElementById('settingsModal');
+        modal.style.display = 'none';
+    }
+
+    function saveSettings() {
+        const apiBase = document.getElementById('apiBase').value.trim();
+        const apiKey = document.getElementById('apiKey').value.trim();
+        
+        localStorage.setItem('apiBase', apiBase);
+        localStorage.setItem('apiKey', apiKey);
+        closeSettings();
+    }
+
+    // 修改原有的API调用函数，使用localStorage中的配置
+    async function callAPI(endpoint, data) {
+        const apiBase = localStorage.getItem('apiBase');
+        const apiKey = localStorage.getItem('apiKey');
+        
+        if (!apiBase || !apiKey) {
+            alert('请先在设置中配置API信息');
+            openSettings();
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiBase}${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('API调用错误:', error);
+            throw error;
+        }
+    }
+
+    // 设置按钮和模态框
+    const settingsBtn = document.querySelector('.settings-btn');
+    const settingsModal = document.getElementById('settingsModal');
+    const saveSettingsBtn = document.querySelector('.button-group button:first-child');
+    const cancelSettingsBtn = document.querySelector('.button-group button:last-child');
+
+    // 打开设置
+    settingsBtn.addEventListener('click', () => {
+        const apiBase = localStorage.getItem('apiBase') || '';
+        const apiKey = localStorage.getItem('apiKey') || '';
+        
+        document.getElementById('apiBase').value = apiBase;
+        document.getElementById('apiKey').value = apiKey;
+        settingsModal.style.display = 'block';
+    });
+
+    // 保存设置
+    saveSettingsBtn.addEventListener('click', () => {
+        const apiBase = document.getElementById('apiBase').value.trim();
+        const apiKey = document.getElementById('apiKey').value.trim();
+        
+        if (!apiBase || !apiKey) {
+            alert('请填写完整的API配置信息');
+            return;
+        }
+        
+        localStorage.setItem('apiBase', apiBase);
+        localStorage.setItem('apiKey', apiKey);
+        settingsModal.style.display = 'none';
+    });
+
+    // 取消设置
+    cancelSettingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+
+    // 点击模态框外部关闭
+    window.addEventListener('click', (event) => {
+        if (event.target === settingsModal) {
+            settingsModal.style.display = 'none';
+        }
+    });
+
+    // 自定义下拉菜单
+    const modelSelect = document.getElementById('modelSelect');
+    const selectButton = document.querySelector('.model-select-button');
+    const dropdown = document.querySelector('.model-select-dropdown');
+    const options = document.querySelectorAll('.model-option');
+
+    // 点击按钮显示/隐藏下拉列表
+    selectButton.addEventListener('click', () => {
+        dropdown.classList.toggle('active');
+        selectButton.classList.toggle('active');
+    });
+
+    // 选择选项
+    options.forEach(option => {
+        option.addEventListener('click', () => {
+            const value = option.dataset.value;
+            const text = option.textContent;
+
+            // 更新原生select的值
+            modelSelect.value = value;
+
+            // 更新按钮文本
+            selectButton.textContent = text;
+
+            // 更新选中状态
+            options.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+
+            // 关闭下拉列表
+            dropdown.classList.remove('active');
+            selectButton.classList.remove('active');
+        });
+    });
+
+    // 点击外部关闭下拉列表
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.model-select-wrapper')) {
+            dropdown.classList.remove('active');
+            selectButton.classList.remove('active');
+        }
+    });
 }); 

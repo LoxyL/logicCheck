@@ -26,6 +26,14 @@ def check_document():
         if 'file' not in request.files:
             return jsonify({'error': 'No file provided'}), 400
         
+        # 获取API配置和模型选择
+        api_base = request.headers.get('api-base')
+        api_key = request.headers.get('api-key')
+        model = request.headers.get('model', 'deepseek-ai/DeepSeek-V3')  # 默认模型
+
+        if not api_base or not api_key:
+            return jsonify({'error': '缺少API配置'}), 400
+        
         file = request.files['file']
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
@@ -40,6 +48,10 @@ def check_document():
             try:
                 doc_processor = DocumentProcessor()
                 ai_checker = AIChecker()
+
+                # 设置API配置
+                doc_processor.set_api_config(api_base, api_key, model)
+                ai_checker.set_api_config(api_base, api_key, model)
 
                 # 使用文件内容的副本进行处理
                 file_copy = io.BytesIO(file_content)

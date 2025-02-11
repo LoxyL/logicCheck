@@ -6,26 +6,33 @@ from openai import OpenAI
 import re
 import json
 
-def load_config():
-    config = {}
-    with open('backend/config.txt', 'r') as f:
-        for line in f:
-            if '=' in line:
-                key, value = line.strip().split('=', 1)
-                config[key] = value
-    return config
-
-config = load_config()
-API_URL = config['API_URL']
-API_KEY = config['API_KEY']
+class AIModelAPI:
+    def __init__(self, model, api_key, base_url=None):
+        self.model = model
+        client_params = {
+            "api_key": api_key,
+        }
+        if base_url:
+            client_params["base_url"] = base_url
+            
+        self.client = OpenAI(**client_params)
+        
+    def generate(self, prompt):
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            raise Exception(f"API调用失败: {str(e)}")
 
 class DocumentProcessor:
     def __init__(self):
-        # 初始化OpenAI客户端用于文档结构分析
-        self.client = OpenAI(
-            api_key=API_KEY,
-            base_url=API_URL
-        )
+        self.api_base = None
+        self.api_key = None
+        self.model = None
         
         # 更新分析提示，要求更精确的结构分析
         self.structure_prompt = PromptTemplate(
@@ -56,6 +63,14 @@ class DocumentProcessor:
             )
         )
 
+    def set_api_config(self, api_base, api_key, model):
+        """设置API配置"""
+        self.api_base = api_base
+        self.api_key = api_key
+        self.model = model
+        
+        self.llm = AIModelAPI(model=self.model, api_key=self.api_key, base_url=self.api_base)
+
     def extract_text(self, file):
         doc = Document(io.BytesIO(file.read()))
         
@@ -85,15 +100,9 @@ class DocumentProcessor:
         """使用AI分析文档结构"""
         try:
             prompt = self.structure_prompt.format(text=text_sample)
-            config = load_config()
-            response = self.client.chat.completions.create(
-                model=config.get('MODEL_NAME', 'gpt-4'),  # 使用配置文件中的模型名称，默认为 gpt-4
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.3
-            )
+            response = self.llm.generate(prompt)
             
-            response_text = response.choices[0].message.content
-            response_text = response_text.strip('```json').strip('```')
+            response_text = response.strip('```json').strip('```')
             structure = json.loads(response_text)
             print("文档结构分析结果:", json.dumps(structure, ensure_ascii=False, indent=2))
             return structure
