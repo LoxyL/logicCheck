@@ -2,7 +2,7 @@ import json
 import os
 from dotenv import load_dotenv
 from langchain.prompts import PromptTemplate
-from .ai_model_api import AIModelAPI
+from ai_model_api import AIModelAPI
 
 load_dotenv()
 

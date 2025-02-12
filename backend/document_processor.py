@@ -5,7 +5,7 @@ from langchain.prompts import PromptTemplate
 from openai import OpenAI
 import re
 import json
-from .ai_model_api import AIModelAPI
+from ai_model_api import AIModelAPI
 
 class DocumentProcessor:
     def __init__(self):
