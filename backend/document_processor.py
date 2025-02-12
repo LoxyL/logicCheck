@@ -5,28 +5,7 @@ from langchain.prompts import PromptTemplate
 from openai import OpenAI
 import re
 import json
-
-class AIModelAPI:
-    def __init__(self, model, api_key, base_url=None):
-        self.model = model
-        client_params = {
-            "api_key": api_key,
-        }
-        if base_url:
-            client_params["base_url"] = base_url
-            
-        self.client = OpenAI(**client_params)
-        
-    def generate(self, prompt):
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.3
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            raise Exception(f"API调用失败: {str(e)}")
+from .ai_model_api import AIModelAPI
 
 class DocumentProcessor:
     def __init__(self):
